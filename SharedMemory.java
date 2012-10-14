@@ -19,6 +19,7 @@ public class SharedMemory {
 	private Object lock_cs = new Object();
 	private Object lock_cn = new Object();
 	private Object lock_iz = new Object();
+	private Object lock_mn = new Object();
 	
     //mutex
     private  int temp_num;
@@ -30,6 +31,7 @@ public class SharedMemory {
     private int if_zero_node_complete;
     private int cs_num ;
     private int complete_num;
+    private int message_num;
     
     public SharedMemory() {
         this.temp_num = 0;
@@ -43,6 +45,7 @@ public class SharedMemory {
         this.cs_num = 0;
         this.complete_num = 0;
         this.if_zero_node_complete=0;
+        this.message_num = 0;
     }
     
     public void incrementTempNum() {
@@ -112,6 +115,19 @@ public class SharedMemory {
     public int getCsNum(){
     	synchronized (lock_cs) {
             return this.cs_num;
+        }
+    }
+    
+    //message num
+    public void incrementMnNum(int n){
+    	synchronized (lock_mn) {
+            this.message_num += n;
+        }
+    }
+
+    public int getMnNum(){
+    	synchronized (lock_mn) {
+            return this.message_num;
         }
     }
     

@@ -72,6 +72,7 @@ public  class SenderThread extends Thread
     	    		     threadMessage("SENT:" + request_string);
     	    		     out.println(request_string);
     	    		     
+    	    		     RicartAgrawala.sm.incrementMnNum(1);
     	    		     RicartAgrawala.sm.setIrTrue(rq_num);
     	    		     
     	    		     i++;
@@ -80,7 +81,11 @@ public  class SenderThread extends Thread
     	    	  if(RicartAgrawala.sm.getState() == "COMPLETE" && rq_num == 0 &&
     	    			  RicartAgrawala.sm.getIcNum() == 0)
     	    	  {
-    	    		     complete_string = "Complete " + SharedMemory.nodeId;
+                         RicartAgrawala.sm.incrementMnNum(1);
+                         int message_number =  RicartAgrawala.sm.getMnNum();
+    	    		  
+    	    		     complete_string = "Complete " + message_number
+    	    		    		          + " " + SharedMemory.nodeId ;
     	    		     threadMessage("SENT:" + complete_string);
     	    		     out.println(complete_string);
     	    		     

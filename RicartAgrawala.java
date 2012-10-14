@@ -118,8 +118,11 @@ public class RicartAgrawala {
 	    		  
 	    	  }
 	    	  
-	    	  //end
+	    	  //end ,only zero node can satisfy
 	    	  if(sm.getCnNum() == SharedMemory.NODE_NUM ){
+	    		  //compute the number of message
+	    		  System.out.println("The total number of messages are " + sm.getMnNum());
+	    		  
 	    		  System.out.println("END!!!");
 	    		  break;
 	    	  }
