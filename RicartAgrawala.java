@@ -68,31 +68,61 @@ public class RicartAgrawala {
 	      {
 	    	  if(sm.getState() == "INIT")
 	    	  {
-	    		    //sleep [10,20] time unit
-	    		    Random randomGenerator = new Random();
-	                int randomInt = randomGenerator.nextInt(11)+10;
-	    		    try {
-	        	          Thread.sleep(randomInt * SharedMemory.TIME_UNIT);
-	        	     } catch(InterruptedException ex) {
-	        	          Thread.currentThread().interrupt();
-	        	     }
+	    		    if(sm.getCsNum()>=20 && SharedMemory.nodeId % 2 == 0){
+	    		    	//sleep [40,50] time unit
+		    		    Random randomGenerator = new Random();
+		                int randomInt = randomGenerator.nextInt(11)+40;
+		    		    try {
+		        	          Thread.sleep(randomInt * SharedMemory.TIME_UNIT);
+		        	     } catch(InterruptedException ex) {
+		        	          Thread.currentThread().interrupt();
+		        	     }
+	    		    }else{
+	    		    	//sleep [10,20] time unit
+		    		    Random randomGenerator = new Random();
+		                int randomInt = randomGenerator.nextInt(11)+10;
+		    		    try {
+		        	          Thread.sleep(randomInt * SharedMemory.TIME_UNIT);
+		        	     } catch(InterruptedException ex) {
+		        	          Thread.currentThread().interrupt();
+		        	     }
+	    		    }
+	    		  
+	    		    //to reset environment
+	    		    for(int i=0 ; i<SharedMemory.NODE_NUM;i++){
+	    		    	 sm.setIrFalse(i);
+	    		    }
+	    		    sm.resetReplyNum();
 	    		    sm.changeState("REQUEST") ;
+	    		    
 	    	  }
 	    	  
-	    	  if(sm.getReplyNum() == SharedMemory.NODE_NUM -1)
+	    	  if(sm.getReplyNum() == SharedMemory.NODE_NUM -1 &&
+	    			  sm.getState() != "COMPLETE")
 	    	  {
 	    		  System.out.println("CS");
-	    		  //SharedMemory.cs_num ++;
+	    		  try {
+        	          Thread.sleep(3 * SharedMemory.TIME_UNIT);
+        	      } catch(InterruptedException ex) {
+        	          Thread.currentThread().interrupt();
+        	      }
+	    		  sm.incrementCsNum();
 	    		  sm.changeState("INIT");
 	    		  
-	    	  }/*
-	    	  if (SharedMemory.cs_num == 3)
+	    	  }
+	    	  if (sm.getState() != "COMPLETE" && sm.getCsNum() == 40)
 	    	  {
-	    		  System.out.println("END");
-	    		  SharedMemory.state = "END";
+	    		  System.out.println("COMPLETE");
+	    		  sm.changeState("COMPLETE");
 	    		  
-	    		  SharedMemory.cs_num = 0;
-	    	  }*/
+	    		  
+	    	  }
+	    	  
+	    	  //end
+	    	  if(sm.getCnNum() == SharedMemory.NODE_NUM ){
+	    		  System.out.println("END!!!");
+	    		  break;
+	    	  }
 	    	
 	    }
 

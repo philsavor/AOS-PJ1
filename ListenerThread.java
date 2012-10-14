@@ -67,6 +67,9 @@ public  class ListenerThread extends Thread {
 	        	    }else if (tokens[0].equals("Reply")){
 	        	    	 threadMessage("RECEIVE:" + receive_string);
 	        	    	 RicartAgrawala.sm.incrementReplyNum();
+	        	    }else if (tokens[0].equals("Complete")){
+	        	    	 threadMessage("RECEIVE:" + receive_string);
+	        	    	 RicartAgrawala.sm.incrementCnNum();
 	        	    }
 	            }
 	            out.close();

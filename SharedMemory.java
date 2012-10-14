@@ -5,33 +5,44 @@ import java.util.*;
 
 public class SharedMemory {
     public static final int NODE_NUM = 5;
-    public static final int TIME_UNIT = 200;
+    public static final int TIME_UNIT = 50;
     public static int nodeId = 0;
     public static ServerSocket serverSocket = null;
     
     
 	private Object lock_t = new Object();
 	private Object lock_state = new Object();
-	private Object lock_rn = new Object();
 	private Object lock_rq = new Object();
 	private Object lock_rp = new Object();
+	private Object lock_ir = new Object();
+	private Object lock_ic = new Object();
+	private Object lock_cs = new Object();
+	private Object lock_cn = new Object();
+	private Object lock_iz = new Object();
 	
     //mutex
-    private  int temp_num=0;
-    private  String state = "INIT";
-    private int request_num = 0;
+    private  int temp_num;
+    private  String state ;
     private List<String> request_queue;
-    private int reply_num = 0;
-    
-    //private int cs_num = 0;
+    private int reply_num ;
+    private int[] if_request = new int[NODE_NUM];
+    private int if_complete;
+    private int if_zero_node_complete;
+    private int cs_num ;
+    private int complete_num;
     
     public SharedMemory() {
         this.temp_num = 0;
         this.state = "INIT";
-        this.request_num = 0;
         request_queue =  new ArrayList<String>();
         this.reply_num = 0;
-        //this.cs_num = 0;
+        for(int i=0;i<NODE_NUM ; i++){
+        	if_request[i] = 0;
+        }
+        this.if_complete = 0;
+        this.cs_num = 0;
+        this.complete_num = 0;
+        this.if_zero_node_complete=0;
     }
     
     public void incrementTempNum() {
@@ -57,19 +68,7 @@ public class SharedMemory {
             state = s;
         }
     }
-    
-    //request num
-    public void incrementRequestNum(){
-    	synchronized (lock_rn) {
-            this.request_num++;
-        }
-    }
-
-    public int getRequestNum(){
-    	synchronized (lock_rn) {
-            return this.request_num;
-        }
-    }
+ 
     
     //reply num
     public void incrementReplyNum(){
@@ -81,6 +80,83 @@ public class SharedMemory {
     public int getReplyNum(){
     	synchronized (lock_rp) {
             return this.reply_num;
+        }
+    }
+    
+    public void resetReplyNum(){
+    	synchronized (lock_rp) {
+            this.reply_num = 0;
+        }
+    }
+    
+    //complete num
+    public void incrementCnNum(){
+    	synchronized (lock_cn) {
+            this.complete_num++;
+        }
+    }
+
+    public int getCnNum(){
+    	synchronized (lock_cn) {
+            return this.complete_num;
+        }
+    }
+    
+  //cs num
+    public void incrementCsNum(){
+    	synchronized (lock_cs) {
+            this.cs_num++;
+        }
+    }
+
+    public int getCsNum(){
+    	synchronized (lock_cs) {
+            return this.cs_num;
+        }
+    }
+    
+    //if_complete
+    public void setIcTrue(){
+    	synchronized (lock_ic) {
+           this.if_complete = 1;
+        }
+    }
+    
+    public int getIcNum(){
+    	synchronized (lock_ic) {
+            return this.if_complete;
+        }
+    }
+    
+    //if_zero_node_complete
+    public void setIzTrue(){
+    	synchronized (lock_iz) {
+           this.if_zero_node_complete = 1;
+        }
+    }
+    
+    public int getIzNum(){
+    	synchronized (lock_iz) {
+            return this.if_zero_node_complete;
+        }
+    }
+    
+  //if_request
+    public void setIrFalse(int index){
+    	synchronized (lock_ir) {
+            this.if_request[index] = 0;
+        }
+    }
+
+    public void setIrTrue(int index){
+    	synchronized (lock_ir) {
+           this.if_request[index] = 1;
+        }
+    }
+    
+    public int getIrValue(int index){
+    	synchronized (lock_ir) {
+           return this.if_request[index];
         }
     }
     

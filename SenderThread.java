@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.concurrent.locks.*;
 
 public  class SenderThread extends Thread 
@@ -24,7 +22,6 @@ public  class SenderThread extends Thread
         {
         	Socket echoSocket = null;
             PrintWriter out = null;
-            BufferedReader in = null; 
             
             //determine the port
             int port = 0, rq_num = 0;
@@ -49,8 +46,6 @@ public  class SenderThread extends Thread
             	{
                           echoSocket = new Socket("localhost", port);
                           out = new PrintWriter(echoSocket.getOutputStream(), true);
-                          in = new BufferedReader(new InputStreamReader(
-                                            echoSocket.getInputStream()));
                           break;
                        } catch (UnknownHostException e) {
                             System.err.println("Don't know about host: localhost.");
@@ -64,26 +59,39 @@ public  class SenderThread extends Thread
                     
     	//BufferedReader stdIn = new BufferedReader(
          //                              new InputStreamReader(System.in));
-    	String request_string = "Request " + SharedMemory.nodeId + " ->" + rq_num 
-    			               + "port: " + port;	
         try
         {     
-        	 //String reply_string = null;
-        	 int if_req = 0;
-        	 String temp_string,reply_string;
+        	 String temp_string,request_string,reply_string,complete_string;
         	 for(int i =0;i<100;)
     	      {  
-        		 //threadMessage(SharedMemory.state);
-    	    	  if(RicartAgrawala.sm.getState() == "REQUEST" && if_req == 0)
+    	    	  if(RicartAgrawala.sm.getState() == "REQUEST" && 
+    	    			  RicartAgrawala.sm.getIrValue(rq_num) == 0)
     	    	  {
-    	    		  
+    	    		     request_string = "Request " + SharedMemory.nodeId + " ->" + rq_num 
+   			               + "port: " + port;
     	    		     threadMessage("SENT:" + request_string);
     	    		     out.println(request_string);
-    	    		     RicartAgrawala.sm.incrementRequestNum();
     	    		     
-    	    		     if_req = 1;
+    	    		     RicartAgrawala.sm.setIrTrue(rq_num);
     	    		     
     	    		     i++;
+    	    	  }
+    	    	  
+    	    	  if(RicartAgrawala.sm.getState() == "COMPLETE" && rq_num == 0 &&
+    	    			  RicartAgrawala.sm.getIcNum() == 0)
+    	    	  {
+    	    		     complete_string = "Complete " + SharedMemory.nodeId;
+    	    		     threadMessage("SENT:" + complete_string);
+    	    		     out.println(complete_string);
+    	    		     
+    	    		     RicartAgrawala.sm.setIcTrue();
+    	    	  }
+    	    	  
+    	    	  if(RicartAgrawala.sm.getState() == "COMPLETE" && SharedMemory.nodeId == 0
+    	    			  && RicartAgrawala.sm.getIzNum() == 0)
+    	    	  {
+    	    		  RicartAgrawala.sm.incrementCnNum();
+    	    		  RicartAgrawala.sm.setIzTrue();
     	    	  }
     	    	  
     	    	  //sent reply
@@ -94,16 +102,10 @@ public  class SenderThread extends Thread
     	    				        +"port:" + port;
  	    		      out.println(reply_string);
     	    		  //SharedMemory.reply_num ++;
-    	    	  }/*
-    	    	  if(SharedMemory.state == "END")
-    	    	  {
-    	    		  break;
-    	    	  }*/
+    	    	  }
     	       }
          
-        	 out.close();
-       	   in.close();
-       	   //stdIn.close();
+           out.close();
        	   echoSocket.close();
     
         }catch(IOException e) 
