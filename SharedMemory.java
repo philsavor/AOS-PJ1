@@ -19,7 +19,9 @@ public class SharedMemory {
 	private Object lock_cs = new Object();
 	private Object lock_cn = new Object();
 	private Object lock_iz = new Object();
-	private Object lock_mn = new Object();
+	private Object lock_mn = new Object();   //message_num
+	private Object lock_tt = new Object();   //timestamp
+	private Object lock_rt = new Object();   //request_timestamp
 	
     //mutex
     private  int temp_num;
@@ -32,6 +34,8 @@ public class SharedMemory {
     private int cs_num ;
     private int complete_num;
     private int message_num;
+    private int timestamp;
+    private int request_timestamp;
     
     public SharedMemory() {
         this.temp_num = 0;
@@ -46,6 +50,8 @@ public class SharedMemory {
         this.complete_num = 0;
         this.if_zero_node_complete=0;
         this.message_num = 0;
+        this.timestamp = 0;
+        this.request_timestamp = 0;
     }
     
     public void incrementTempNum() {
@@ -131,6 +137,38 @@ public class SharedMemory {
         }
     }
     
+    //timestamp
+    public void incrementTtNum(int n){
+    	synchronized (lock_tt) {
+            this.timestamp += n;
+        }
+    }
+    
+    public void changeTtNum(int n){
+    	synchronized (lock_tt) {
+            this.timestamp = n;
+        }
+    }
+
+    public int getTtNum(){
+    	synchronized (lock_tt) {
+            return this.timestamp;
+        }
+    }
+    
+    //request timestamp
+    public void changeRtNum(int n){
+    	synchronized (lock_rt) {
+            this.request_timestamp = n;
+        }
+    }
+
+    public int getRtNum(){
+    	synchronized (lock_rt) {
+            return this.request_timestamp;
+        }
+    }
+    
     //if_complete
     public void setIcTrue(){
     	synchronized (lock_ic) {
@@ -187,18 +225,29 @@ public class SharedMemory {
     	synchronized (lock_rq) {
     		if(request_queue.size()>0)
     		{
-     		    String hm = request_queue.get(0);
+    			for(int i = 0 ; i< request_queue.size(); i++){
+    				String hm = request_queue.get(i);
+         		    
+         		    String delims = "[ ]+";
+         		    String[] tokens = (hm).split(delims);
+         		    int temp = Integer.parseInt(tokens[1]);
+         		    //request timestamp
+         		    int rt = Integer.parseInt(tokens[2]);
+         		    if(index == temp){
+         		    	if(this.getState() != "REQUEST" && this.getState() != "CS" ||
+         		    	   this.getState() == "REQUEST" && this.getRtNum() > rt ||
+         		    	   this.getState() == "REQUEST" && this.getRtNum() == rt &&
+         		    	   temp < SharedMemory.nodeId)
+         		    	{
+                 		    request_queue.remove(i);
+                            return hm;
+         		    	}
+         		    }
+    			}
+    			
+    			return null;
      		    
-     		    String delims = "[ ]+";
-     		    String[] tokens = (hm).split(delims);
-     		    int temp = Integer.parseInt(tokens[1]);
-     		    
-     		    if(index == temp){
-         		    request_queue.remove(0);
-                    return hm;
-     		    }else
-     		    	return null;
-    		}else
+    	   }else
     			return null;
         }
     }

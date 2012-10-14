@@ -4,12 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-//import java.net.ServerSocket;
 import java.net.Socket;
-//import java.net.UnknownHostException;
-//import java.util.Random;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public  class ListenerThread extends Thread {
+	
+	private static Lock lock = new ReentrantLock(); 
 	
     // Display a message, preceded by
     // the name of the current thread
@@ -23,8 +24,6 @@ public  class ListenerThread extends Thread {
 
 	public void run()  {
 	try{
-	        
-
 	            Socket clientSocket = null;
 	            try {
 	                clientSocket = SharedMemory.serverSocket.accept();
@@ -37,34 +36,32 @@ public  class ListenerThread extends Thread {
 	            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 	            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-	            
-	            System.out.println("Echo server started");
+	            System.out.println("Server started");
 	        
-
 	            String receive_string;
 	            while ((receive_string = in.readLine()) != null) {
-	            	
-	            	/*/////////////////////////////////////
-	            	try {
-	            	    Thread.sleep(1000);
-	            	} catch(InterruptedException ex) {
-	            	    Thread.currentThread().interrupt();
-	            	}
-	            	inputLine += "sdf";
-	            	
-	            	Random randomGenerator = new Random();
-	                int randomInt = randomGenerator.nextInt(10)+10;
-	                  
-	            	inputLine += Integer.toString(randomInt);
-	            	//////////////////////////////////*/
-	                //threadMessage("REPLY: "+receive_string);
-	                //out.println(reply_string);
 	            	String delims = "[ ]+";
 	        	    String[] tokens = (receive_string).split(delims);
 	        	    //request
 	        	    if (tokens[0].equals("Request")){
+	        	    	 lock.lock();
+	        	    	 int temp_tt = Integer.parseInt(tokens[2]);
+	        	    	 if (temp_tt > RicartAgrawala.sm.getTtNum())
+	        	    		 RicartAgrawala.sm.changeTtNum(temp_tt+1);
+	        	    	 else 
+	        	    		 RicartAgrawala.sm.incrementTtNum(1);
+	        	    	 lock.unlock();
+	        	    	 
 	            	     RicartAgrawala.sm.addRequest(receive_string);
 	        	    }else if (tokens[0].equals("Reply")){
+	        	    	 lock.lock();
+	        	    	 int temp_tt = Integer.parseInt(tokens[2]);
+	        	    	 if (temp_tt > RicartAgrawala.sm.getTtNum())
+	        	    		 RicartAgrawala.sm.changeTtNum(temp_tt+1);
+	        	    	 else 
+	        	    		 RicartAgrawala.sm.incrementTtNum(1);
+	        	    	 lock.unlock();
+	        	    	
 	        	    	 //to compute the number of messages 
 	        	    	 RicartAgrawala.sm.incrementMnNum(1);
 	        	    	 
@@ -78,12 +75,13 @@ public  class ListenerThread extends Thread {
 	        	    	 RicartAgrawala.sm.incrementMnNum(Integer.parseInt(tokens[1]));
 	        	    }
 	            }
+	            
 	            out.close();
 	            in.close();
 	            clientSocket.close();
-	            
 	            SharedMemory.serverSocket.close();
-	        	} catch (IOException e) {}
+	            
+	   } catch (IOException e) {}
 	}
 }
 

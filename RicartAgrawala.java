@@ -89,10 +89,12 @@ public class RicartAgrawala {
 	    		    }
 	    		  
 	    		    //to reset environment
-	    		    for(int i=0 ; i<SharedMemory.NODE_NUM;i++){
+	    		    for(int i=0 ; i<SharedMemory.NODE_NUM ; i++){
 	    		    	 sm.setIrFalse(i);
 	    		    }
 	    		    sm.resetReplyNum();
+	    		    sm.incrementTtNum(1);  //request timestamp
+	    		    sm.changeRtNum(sm.getTtNum());
 	    		    sm.changeState("REQUEST") ;
 	    		    
 	    	  }
@@ -101,6 +103,7 @@ public class RicartAgrawala {
 	    			  sm.getState() != "COMPLETE")
 	    	  {
 	    		  System.out.println("CS");
+	    		  sm.changeState("CS");
 	    		  try {
         	          Thread.sleep(3 * SharedMemory.TIME_UNIT);
         	      } catch(InterruptedException ex) {

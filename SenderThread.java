@@ -67,8 +67,12 @@ public  class SenderThread extends Thread
     	    	  if(RicartAgrawala.sm.getState() == "REQUEST" && 
     	    			  RicartAgrawala.sm.getIrValue(rq_num) == 0)
     	    	  {
-    	    		     request_string = "Request " + SharedMemory.nodeId + " ->" + rq_num 
-   			               + "port: " + port;
+    	    		     //format:Request nodeId request_timestamp
+    	    		     int rt = RicartAgrawala.sm.getRtNum();
+    	    		  
+    	    		     //sent request message
+    	    		     request_string = "Request " + SharedMemory.nodeId + " " + rt +
+    	    		    		          " -> " + rq_num + " port: " + port;
     	    		     threadMessage("SENT:" + request_string);
     	    		     out.println(request_string);
     	    		     
@@ -103,10 +107,13 @@ public  class SenderThread extends Thread
     	    	  temp_string = RicartAgrawala.sm.getRqHeadMember(rq_num);
     	    	  if(temp_string != null)
     	    	  {
-    	    		  reply_string = "Reply "+ SharedMemory.nodeId +" ->" + rq_num
-    	    				        +"port:" + port;
+    	    		  RicartAgrawala.sm.incrementTtNum(1);  //reply timestamp
+    	    		 
+    	    		  //format:Reply nodeId reply_timestamp
+ 	    		      int tt = RicartAgrawala.sm.getTtNum();
+    	    		  reply_string = "Reply "+ SharedMemory.nodeId + " " + tt +
+    	    				         " -> " + rq_num + " port: " + port;
  	    		      out.println(reply_string);
-    	    		  //SharedMemory.reply_num ++;
     	    	  }
     	       }
          
