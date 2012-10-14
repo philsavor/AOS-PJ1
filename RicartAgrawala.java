@@ -2,9 +2,11 @@ package main;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-
+import java.util.Random;
 
 public class RicartAgrawala {
+	
+	public static SharedMemory sm = new SharedMemory();
 	
 	public static void main(String[] args) {		
 		
@@ -27,16 +29,16 @@ public class RicartAgrawala {
 	public static void initializeNode(int nodeId) throws Exception {
 		System.out.println("Initializing system ...\n");
 		
-		//9th request thread
-		(new RequestThread()).start();
-		(new RequestThread()).start();
-		(new RequestThread()).start();
-		(new RequestThread()).start();
-		(new RequestThread()).start();
-		(new RequestThread()).start();
-		(new RequestThread()).start();
-		(new RequestThread()).start();
-		(new RequestThread()).start();
+		//9 request thread
+		(new SenderThread()).start();
+		(new SenderThread()).start();
+		(new SenderThread()).start();
+		(new SenderThread()).start();
+		(new SenderThread()).start();
+		(new SenderThread()).start();
+		(new SenderThread()).start();
+		(new SenderThread()).start();
+		(new SenderThread()).start();
 		
 		
 		//determine the port
@@ -61,6 +63,38 @@ public class RicartAgrawala {
 		(new ListenerThread()).start();
 		(new ListenerThread()).start();
 	
+		System.out.println("INIT");
+		while(true) 
+	      {
+	    	  if(sm.getState() == "INIT")
+	    	  {
+	    		    //sleep [10,20] time unit
+	    		    Random randomGenerator = new Random();
+	                int randomInt = randomGenerator.nextInt(11)+10;
+	    		    try {
+	        	          Thread.sleep(randomInt * SharedMemory.TIME_UNIT);
+	        	     } catch(InterruptedException ex) {
+	        	          Thread.currentThread().interrupt();
+	        	     }
+	    		    sm.changeState("REQUEST") ;
+	    	  }
+	    	  
+	    	  if(sm.getReplyNum() == SharedMemory.NODE_NUM -1)
+	    	  {
+	    		  System.out.println("CS");
+	    		  //SharedMemory.cs_num ++;
+	    		  sm.changeState("INIT");
+	    		  
+	    	  }/*
+	    	  if (SharedMemory.cs_num == 3)
+	    	  {
+	    		  System.out.println("END");
+	    		  SharedMemory.state = "END";
+	    		  
+	    		  SharedMemory.cs_num = 0;
+	    	  }*/
+	    	
+	    }
 
 		//logger.info("system has started");
 		

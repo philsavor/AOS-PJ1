@@ -7,7 +7,7 @@ import java.io.PrintWriter;
 //import java.net.ServerSocket;
 import java.net.Socket;
 //import java.net.UnknownHostException;
-import java.util.Random;
+//import java.util.Random;
 
 public  class ListenerThread extends Thread {
 	
@@ -21,8 +21,8 @@ public  class ListenerThread extends Thread {
                           message);
     }
 
-	        public void run()  {
-	        	try{
+	public void run()  {
+	try{
 	        
 
 	            Socket clientSocket = null;
@@ -39,15 +39,12 @@ public  class ListenerThread extends Thread {
 
 	            
 	            System.out.println("Echo server started");
-	            
-	            ///////////////////////
-	            //(new RequestThread1()).start();
-	            ///////////////////////
+	        
 
-	            String inputLine;
-	            while ((inputLine = in.readLine()) != null) {
+	            String receive_string;
+	            while ((receive_string = in.readLine()) != null) {
 	            	
-	            	//////////////////////////////////////
+	            	/*/////////////////////////////////////
 	            	try {
 	            	    Thread.sleep(1000);
 	            	} catch(InterruptedException ex) {
@@ -59,9 +56,18 @@ public  class ListenerThread extends Thread {
 	                int randomInt = randomGenerator.nextInt(10)+10;
 	                  
 	            	inputLine += Integer.toString(randomInt);
-	            	///////////////////////////////////
-	                System.out.println("echoing: " + inputLine);
-	                out.println(inputLine);
+	            	//////////////////////////////////*/
+	                //threadMessage("REPLY: "+receive_string);
+	                //out.println(reply_string);
+	            	String delims = "[ ]+";
+	        	    String[] tokens = (receive_string).split(delims);
+	        	    //request
+	        	    if (tokens[0].equals("Request")){
+	            	     RicartAgrawala.sm.addRequest(receive_string);
+	        	    }else if (tokens[0].equals("Reply")){
+	        	    	 threadMessage("RECEIVE:" + receive_string);
+	        	    	 RicartAgrawala.sm.incrementReplyNum();
+	        	    }
 	            }
 	            out.close();
 	            in.close();
@@ -69,6 +75,6 @@ public  class ListenerThread extends Thread {
 	            
 	            SharedMemory.serverSocket.close();
 	        	} catch (IOException e) {}
-	        }
+	}
 }
 
