@@ -1,6 +1,8 @@
 package main;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -16,10 +18,17 @@ public  class ListenerThread extends Thread {
     // the name of the current thread
     static void threadMessage(String message) {
         String threadName =
-            Thread.currentThread().getName();
-        System.out.format("%s: %s%n",
-                          threadName,
-                          message);
+	            Thread.currentThread().getName();
+	        String out_string = String.format("%s: %s%n",
+	                          threadName,
+	                          message);
+	        
+	        try {
+	            BufferedWriter out = new BufferedWriter(new FileWriter("out.txt",true));
+	            out.write(out_string);
+	            out.close();
+	        } catch (IOException e) {
+	        }
     }
 
 	public void run()  {
@@ -29,14 +38,14 @@ public  class ListenerThread extends Thread {
 	                clientSocket = SharedMemory.serverSocket.accept();
 	            }
 	            catch (IOException e) {
-	                System.err.println("Accept failed.");
+	                //System.err.println("Accept failed.");
 	                System.exit(1);
 	            }
 
 	            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 	            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-	            System.out.println("Server started");
+	            threadMessage("Server started");
 	        
 	            String receive_string;
 	            while ((receive_string = in.readLine()) != null) {
@@ -66,13 +75,16 @@ public  class ListenerThread extends Thread {
 	        	    	 RicartAgrawala.sm.incrementMnNum(1);
 	        	    	 
 	        	    	 threadMessage("RECEIVE:" + receive_string);
-	        	    	 RicartAgrawala.sm.incrementReplyNum();
+    	    		     System.out.println("RECEIVE:" + receive_string);
+	        	    	 RicartAgrawala.sm.setIfReplyTrue(Integer.parseInt(tokens[1]));
 	        	    }else if (tokens[0].equals("Complete")){
 	        	    	 threadMessage("RECEIVE:" + receive_string);
 	        	    	 RicartAgrawala.sm.incrementCnNum();
 	        	    	 
 	        	    	 //compute the number of messages
 	        	    	 RicartAgrawala.sm.incrementMnNum(Integer.parseInt(tokens[1]));
+	        	    }else if (tokens[0].equals("End")){
+	        	    	RicartAgrawala.sm.changeState("END");
 	        	    }
 	            }
 	            
